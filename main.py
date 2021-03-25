@@ -25,34 +25,58 @@ window = sg.Window('image_processing', layout)
 # Eventos
 while True:
   event, values = window.Read()
+
   if event == '-FOLDER-':
     path_image = values['-FOLDER-']
 
     if path_image.endswith(".jpg") == True:
-      #COPIA IMAGEM PARA INPUT
-      shutil.copy(path_image,input_folder)
-      
-      #LISTA ARQUIVOS NA PASTA INPUT
-      folder_file = os.listdir('input')
+      try:
+        shutil.copy(path_image,input_folder)
+        image_name = os.path.basename(path_image)
 
-      #RENOMEAR TODAS IMGENS COM A EXTENÇÃO JPG
-      for x in folder_file:
-        if x.endswith(".jpg") == True:
-          #NOVO NOME PARA IMAGEM
-          file_paht_name = (input_folder+x)
-          converted_image_name = file_paht_name.replace('.jpg','.png')
-          try:
-            #RENOMEIA A IMAGEM
-            os.rename(file_paht_name,converted_image_name)
-            image_name = os.path.basename(converted_image_name)
-          except:
-            #REMOVE IMAGEM CASO JÀ EXISTA UMA COM MESMO NOME
-            os.remove(converted_image_name)
-            os.rename(file_paht_name,converted_image_name)
-            image_name = os.path.basename(converted_image_name)
-    else:
+        #MANTER MESMO NOME E ALTERAR EXTEMÇÃO PARA PNG
+        new_image_name = image_name.replace('.jpg','.png')
+        #CONVERTE IMAGEM PARA PNG
+        Image.open(input_folder+image_name).save(input_folder+new_image_name)
+        
+        #REMOVE A IMAGEM JPG
+        try:
+          os.remove(input_folder+image_name)
+        except:
+          sg.Popup('Não foi possivel deletar a imagem!!')
+        
+        #ATUALIZA IMAGEM
+        window["-IMAGE-"].update(input_folder+new_image_name)
+        
+        arquivos = listar_images()
+        window["-FILE LIST-"].update(arquivos)
+      except:
+        sg.Popup('Ocorreu um erro ao carregar a imagem!!')
+    elif path_image.endswith(".png") == True:
       shutil.copy(path_image,input_folder)
       image_name = os.path.basename(path_image)
+      try:
+        window["-IMAGE-"].update(input_folder+image_name)
+
+        arquivos = listar_images()
+        window["-FILE LIST-"].update(arquivos)
+      except:
+        #CASO A IMAGEM TENHA FORMATO DIFERENTE E TENHA SIDO RENOMEADA
+        #CONVERTE IMAGEM PARA PNG PARA EVITAR PARA EVITAR POSSIVEIS ERROS
+        Image.open(input_folder+image_name).save(input_folder+image_name)
+        window["-IMAGE-"].update(input_folder+image_name)
+
+        arquivos = listar_images()
+        window["-FILE LIST-"].update(arquivos)
+    else:
+      sg.Popup('Ocorreu um erro ao carregar a imagem!!!')
+
+  #ATULIZAR IMAGEM AO SELECIONAR NA LISTBOX
+  if event == "-FILE LIST-":
+    filename = os.path.join(
+      values["-FILE LIST-"][0]
+    )
+    window["-IMAGE-"].update(filename='input/'+filename)
 
   if event == sg.WIN_CLOSED or event == 'Quit':
     break
