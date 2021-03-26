@@ -2,6 +2,7 @@
 ########### INICIALIZAÇÃO ############
 ######################################
 import os
+from PIL import Image
 
 #DIRETORIO RAIZ
 dir_path = os.getcwd()
@@ -27,18 +28,14 @@ if os.path.exists(diretorio_atual+'/input/temp') == False:
 ############## FUNCOES ###############
 ######################################
 
-try:
-  file_list = os.listdir('input')
-except:
-  file_list = []
-
-#FILTRAR POR IMAGENS
+file_list = os.listdir('input')
 fnames = [
   f
   for f in file_list
     if os.path.isfile(os.path.join('input', f))
     and f.lower().endswith((".png", ".jpg"))
 ]
+
 
 #LISTA CONTEUDO DA PASTA INPUT
 def listar_images():
@@ -56,8 +53,9 @@ def listar_images():
     return file_list
 
 #GERA UMA IMAGEM DE TAMANHO REDUZIDO APARTIR DA IMAGEM ORIGINAL
-def gerar_miniatura():
-    image = Image.open(converted_image_name)
+def gerar_miniatura(image_miniatura):
+    image_name = os.path.basename(image_miniatura)
+    image = Image.open(image_miniatura)
     MAX_SIZE = (400, 400)
     image.thumbnail(MAX_SIZE)
-    image.save('input/temp/'+original_image)
+    image.save('input/temp/'+image_name)
